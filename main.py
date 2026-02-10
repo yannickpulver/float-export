@@ -381,6 +381,11 @@ def parse_args() -> argparse.Namespace:
         action="store_true",
         help="compact view without task details",
     )
+    parser.add_argument(
+        "--setup",
+        action="store_true",
+        help="re-run config setup",
+    )
     return parser.parse_args()
 
 
@@ -403,14 +408,18 @@ def setup_config() -> None:
 
 
 def main() -> None:
+    args = parse_args()
+
+    if args.setup:
+        setup_config()
+        sys.exit(0)
+
     if not TOKEN or not DEPARTMENT:
         if not CONFIG_FILE.exists():
             setup_config()
             sys.exit(0)
         print(f"Error: FLOAT_API_TOKEN and FLOAT_DEPARTMENT must be set in {CONFIG_FILE}")
         sys.exit(1)
-
-    args = parse_args()
     print(f"Fetching data for department: {DEPARTMENT}...")
 
     people = get_people(DEPARTMENT)
