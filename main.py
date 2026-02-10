@@ -367,6 +367,11 @@ def parse_args() -> argparse.Namespace:
         choices=["current", "next", "month", "all"],
         help="current = this week, next = next week, month = next 4 weeks, all = all three (default)",
     )
+    parser.add_argument(
+        "--compact", "-c",
+        action="store_true",
+        help="compact view without task details",
+    )
     return parser.parse_args()
 
 
@@ -398,14 +403,15 @@ def main() -> None:
     tasks = get_tasks_for_people(people, fetch_start, fetch_end)
     timeoffs = get_timeoffs(fetch_start, fetch_end)
 
+    c = args.compact
     if args.period in ("current", "all"):
-        print_period("THIS WEEK", *this_week, people, tasks, timeoffs, projects)
+        print_period("THIS WEEK", *this_week, people, tasks, timeoffs, projects, compact=c)
     if args.period in ("next", "all"):
-        print_period("NEXT WEEK", *next_week, people, tasks, timeoffs, projects)
+        print_period("NEXT WEEK", *next_week, people, tasks, timeoffs, projects, compact=c)
     if args.period in ("month", "all"):
         print_period(
             "NEXT 4 WEEKS", four_weeks_start, four_weeks_end, people, tasks, timeoffs, projects,
-            compact=True,
+            compact=c,
         )
     print()
 
