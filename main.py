@@ -7,10 +7,19 @@ import sys
 from datetime import date, timedelta
 from typing import Any
 
+from pathlib import Path
+
 import requests
 from dotenv import load_dotenv
 
-load_dotenv()
+CONFIG_DIR = Path.home() / ".config" / "float-export"
+CONFIG_FILE = CONFIG_DIR / ".env"
+
+# Load from config dir, then cwd .env, then environment
+if CONFIG_FILE.exists():
+    load_dotenv(CONFIG_FILE)
+else:
+    load_dotenv()
 
 BASE_URL = "https://api.float.com/v3"
 TOKEN = os.getenv("FLOAT_API_TOKEN", "")
@@ -375,9 +384,30 @@ def parse_args() -> argparse.Namespace:
     return parser.parse_args()
 
 
+def setup_config() -> None:
+    """Interactive first-time setup."""
+    print("First-time setup — creating config at", CONFIG_FILE)
+    print()
+    token = input("Float API token (Settings > Integrations): ").strip()
+    department = input("Department name: ").strip()
+    exclude = input("Exclude names (comma-separated, optional): ").strip()
+
+    CONFIG_DIR.mkdir(parents=True, exist_ok=True)
+    CONFIG_FILE.write_text(
+        f"FLOAT_API_TOKEN={token}\n"
+        f"FLOAT_DEPARTMENT={department}\n"
+        f"FLOAT_EXCLUDE_NAMES={exclude}\n"
+    )
+    print(f"\nConfig saved to {CONFIG_FILE}")
+    print("Run float-export again to see your schedule.\n")
+
+
 def main() -> None:
-    if not TOKEN:
-        print("Error: Set FLOAT_API_TOKEN in .env")
+    if not TOKEN or not DEPARTMENT:
+        if not CONFIG_FILE.exists():
+            setup_config()
+            sys.exit(0)
+        print(f"Error: FLOAT_API_TOKEN and FLOAT_DEPARTMENT must be set in {CONFIG_FILE}")
         sys.exit(1)
 
     args = parse_args()

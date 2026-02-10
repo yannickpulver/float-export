@@ -1,0 +1,16 @@
+[build-system]
+requires = ["setuptools>=68.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "float-export"
+version = "0.1.0"
+description = "CLI tool to show planned vs unplanned hours from Float.com"
+requires-python = ">=3.10"
+dependencies = [
+    "requests>=2.31",
+    "python-dotenv>=1.0",
+]
+
+[project.scripts]
+float-export = "main:main"
